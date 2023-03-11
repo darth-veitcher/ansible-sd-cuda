@@ -1,0 +1,9 @@
+users:
+  - default
+  - name: ansible
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    groups: users, admin, sudo
+    plain_text_passwd: "ubuntu"
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCYLuoQPWC6tw73+NQu+fl+IcjZWcBF1yOGOOKvTpo8fv0FgUpUbrCA/WRC7En193cUl94PRNF25UZ4cpJ9pZQbMRDGXpMWMgTyBPgLCSCV+Wl6d0mbPzpMHUU1OZBlZeUT4O32ktiRaw9VBwklYedx33F1x/Mhv3xH+nwcaZ7fjH0VUFDpE86+W7C9yw6A09vHbMX+T/v5b5wwtK2CzXqDHtq8WDRdEI2WR61TWkY7Ey0m1tqspNOeC6u/fIufXet9OirvBQ9KftD97reu/TiiUN1vBjwwgTqg9mKHwHChH2gH7wnzixd30OXo4IsDUrF/Mf+HTRchPW4btGDJ1F5dZksU0Oi+yht5jtB82F7hpTgRPtClabndVGBVOOhUyWHgPrCXk1UY4Rq3HsZU7dtRv29T1R/19Dsl2QsemaYiCYBktbqDuo/DYHEZFEfX2G3ixynUzGG02LoUEIC8xWTk7CM+v3qI+/TTkoQVYxldLCvI5yF++UfnykgGPwyeLwk= ansible@test.local

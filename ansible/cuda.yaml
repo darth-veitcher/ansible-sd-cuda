@@ -1,0 +1,72 @@
+---
+- name: Install CUDA
+  hosts: all
+  become: true
+  vars:
+    distro: ubuntu2204
+    arch: x86_64
+  environment:
+    CUDA_PATH: "/usr/local/cuda-11.7/bin"
+  #=== TASKS
+  tasks:
+    # APT basic packages
+    - name: Install required packages
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: true
+      loop:
+        - build-essential
+        - git
+        - wget
+        - libglvnd-dev # needed by NVidia driver
+        - pkg-config # needed by NVidia driver
+    # CUDA
+    - name: Install Linux headers
+      shell: "apt install -y linux-headers-$(uname -r)"
+    - name: Remove old key
+      apt_key:
+        id: 7fa2af80
+        state: absent
+    # see: https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Ubuntu&target_version=22.04&target_type=deb_local
+    # and our version: https://developer.nvidia.com/cuda-11-7-1-download-archive?target_os=Linux&target_arch=x86_64&Distribution=Ubuntu&target_version=22.04&target_type=deb_local
+    - name: Add pin file to prioritize CUDA repository
+      get_url:
+        url: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin
+        dest: /etc/apt/preferences.d/cuda-repository-pin-600
+    - name: Obtain CUDA .deb
+      get_url:
+        url: https://developer.download.nvidia.com/compute/cuda/11.7.1/local_installers/cuda-repo-ubuntu2204-11-7-local_11.7.1-515.65.01-1_amd64.deb
+        dest: /tmp/cuda.deb
+    - name: Install local repository on file system
+      apt:
+        deb: /tmp/cuda.deb
+        state: present
+    - name: Enroll ephemeral public GPG key
+      shell: sudo cp /var/cuda-repo-ubuntu2204-11-7-local/cuda-*-keyring.gpg /usr/share/keyrings/
+    - name: Update APT and Install CUDA (this will take a while...)
+      apt:
+        name: "{{item}}"
+        state: present
+        update_cache: true
+      loop:
+        - cuda
+        - nvidia-cuda-toolkit
+    # https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#post-installation-actions
+    - name: Add CUDA to PATH
+      lineinfile:
+        path: /etc/profile.d/cuda.sh
+        line: "export PATH=/usr/local/cuda-11.7/bin${PATH:+:${PATH}}"
+        create: true
+        state: present
+    - name: Check if CUDA is installed
+      shell: "$CUDA_PATH/nvcc --version"
+      register: cuda_installed
+      ignore_errors: true
+    - name: Print CUDA version
+      debug:
+        var: cuda_installed.stdout_lines
+    - name: Fail if CUDA is not installed
+      fail:
+        msg: "CUDA is not installed on this system. Please install CUDA before proceeding."
+      when: cuda_installed.rc != 0

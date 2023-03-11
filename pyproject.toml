@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "ansible-sd-cuda"
+version = "0.1.0"
+description = "Prep an Ubuntu Server LTS node for Stable Diffusion with CUDA"
+authors = ["James Veitch"]
+readme = "README.md"
+packages = [{include = "ansible_sd_cuda"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+ansible = "^7.3.0"
+paramiko = "^3.0.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+pylama = {extras = ["lint"], version = "^8.4.1"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

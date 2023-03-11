@@ -1,0 +1,17 @@
+# Conda Environment for Multi UI Installation
+# Attempt with PyTorch v1.7.1 and CUDA 9.2 https://pytorch.org/get-started/previous-versions/#v171
+name: sd-legacy
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python==3.10.9
+  - pip
+  # Begin: PyTorch
+  # https://pytorch.org/get-started/locally/
+  - pytorch==1.7.1
+  - torchvision==0.8.2
+  - torchaudio==0.7.2
+  - cudatoolkit=9.2
+  # End: PyTorch

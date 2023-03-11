@@ -1,0 +1,40 @@
+# Conda Environment for Multi UI Installation
+name: sd
+channels:
+  - conda-forge
+  - pytorch
+  - nvidia
+dependencies:
+  - python=={{python_310_version.stdout}}
+  - pip
+  - onnxruntime # A1111
+  # Begin: PyTorch
+  # https://pytorch.org/get-started/locally/
+  - pytorch
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=11.7
+  # End: PyTorch
+  - pip:
+      # Other
+      - tensorboard # used for accelerate
+      - accelerate
+      - transformers
+      - diffusers
+      - xformers
+      - scipy
+      - safetensors
+      - git+https://github.com/openai/CLIP.git
+      # Poetry
+      - poetry
+      # Invoke
+      - toml
+      - llvmlite
+      # A1111
+      - opencv-python # see: https://github.com/Mikubill/sd-webui-controlnet
+      - prettytable
+      # kohya_gui
+      - gradio
+      - easygui
+      # LORA extractor
+      - albumentations

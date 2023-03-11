@@ -1,0 +1,33 @@
+- name: Install Automatic1111
+  hosts: all
+  become: true
+  vars:
+    a1111_url: "https://github.com/AUTOMATIC1111/stable-diffusion-webui.git"
+    miniconda_venv: /opt/miniconda3/envs/sd
+  tasks:
+    - name: Set install directory variable
+      shell: "echo $HOME"
+      register: install_dir
+      become: false
+    - name: Clone the github repo
+      git:
+        repo: "{{ a1111_url }}"
+        dest: "{{ install_dir }}"
+        version: master
+        clone: yes
+      become: false
+    - name: Setup webui-user override template
+      template:
+        src: templates/webui-user.sh.j2
+        dest: "{{ install_dir.stdout }}/webui-user.sh"
+    - name: Setup fake venv activation
+      template:
+        src: templates/activate.j2
+        dest: "{{ miniconda_venv }}/bin/activate"
+    - name: Add scripts to PATH
+      lineinfile:
+        path: ~/.profile
+        line: "export PATH=$HOME/.local/bin${PATH:+:${PATH}}"
+        create: true
+        state: present
+      become: false
