@@ -1,0 +1,70 @@
+- name: PyEnv with latest Python 3.10
+  hosts: all
+  become: false
+  vars:
+    python_version: "3.10"
+    pyenv_url: "https://github.com/pyenv/pyenv.git"
+    pyenv_root: "/opt/pyenv"
+  environment:
+    PYENV_ROOT: "{{ pyenv_root }}"
+    PYENV_BINARY: "{{ pyenv_root }}/bin/pyenv"
+  tasks:
+    - name: Pre-req installation
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: true
+      loop:
+        - make
+        - build-essential
+        - libssl-dev
+        - zlib1g-dev
+        - libbz2-dev
+        - libreadline-dev
+        - libsqlite3-dev
+        - wget
+        - curl
+        - llvm
+        - libncursesw5-dev
+        - xz-utils
+        - tk-dev
+        - libxml2-dev
+        - libxmlsec1-dev
+        - libffi-dev
+        - liblzma-dev
+      become: true
+    - name: Ensure installation directory exists and permissions set
+      file:
+        path: $PYENV_ROOT
+        state: directory
+        mode: 0755
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      become: true
+    - name: Install PyEnv
+      git:
+        repo: "{{ pyenv_url }}"
+        # dest: ~/.pyenv
+        dest: $PYENV_ROOT
+        version: master
+        clone: yes
+    # - name: Add PyEnv to PATH
+    #   template:
+    #     src: templates/pyenv.sh.j2
+    #     dest: /etc/profile.d/pyenv.sh
+    #     mode: "0755"
+    - name: Add PyEnv to PATH
+      blockinfile:
+        block: "{{ lookup('template', 'templates/pyenv.sh.j2') }}"
+        dest: /etc/bash.bashrc
+        marker: "#{mark}: PyEnv Managed Block"
+      become: true
+    # - name: Install latest Python 3.10 via PyEnv
+    #   shell: |
+    #     ${PYENV_BINARY} install --list | grep -v - | grep '^\s*3\.10\.[0-9]*$' | tail -n1 | xargs -I {} ${PYENV_BINARY} install {}
+    #     ${PYENV_BINARY} global $(${PYENV_BINARY} versions --bare | grep 3.10)
+    - name: "Install lastest {{ python_version }}"
+      # see: https://github.com/pyenv/pyenv#prefix-auto-resolution-to-the-latest-version
+      shell: "${PYENV_BINARY} install {{ python_version }}"
+    - name: "Set {{ python_version }} as global version"
+      shell: "${PYENV_BINARY} global $(${PYENV_BINARY} versions --bare | grep {{ python_version }}) | head -n1"

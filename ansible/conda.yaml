@@ -1,0 +1,46 @@
+---
+- name: Install Miniconda
+  hosts: all
+  become: true
+  vars:
+    miniconda_root: /opt/miniconda3
+  environment:
+    MINICONDA_ROOT: "{{ miniconda_root }}"
+    CONDA: "{{ miniconda_root }}/bin/conda"
+    CUDA_PATH: "/usr/local/cuda-11.7/bin"
+  tasks:
+    - name: Install required packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - build-essential
+        - git
+        - wget
+    # Miniconda
+    - name: Download Miniconda installer
+      get_url:
+        url: https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+        dest: /tmp/miniconda.sh
+        mode: "0755"
+    - name: Install Miniconda
+      shell: /tmp/miniconda.sh -b -p $MINICONDA_ROOT
+      args:
+        executable: /bin/bash
+        creates: "{{ miniconda_root }}"
+    - name: Chown "{{ miniconda_root }}"
+      file:
+        path: "{{ miniconda_root }}"
+        state: directory
+        recurse: yes
+        owner: "{{ansible_ssh_user}}"
+        group: "{{ansible_ssh_user}}"
+    - name: Add Miniconda to PATH
+      lineinfile:
+        path: /etc/profile.d/miniconda.sh
+        line: 'export PATH="$MINICONDA_ROOT/bin:$PATH"'
+        create: true
+        state: present
+    - name: "Initialise for {{ansible_ssh_user}}"
+      shell: "$CONDA init $(echo $SHELL | awk -F/ '{print $NF}')"
+      become: false

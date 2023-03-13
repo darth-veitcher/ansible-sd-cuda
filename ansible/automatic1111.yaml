@@ -12,7 +12,7 @@
     - name: Clone the github repo
       git:
         repo: "{{ a1111_url }}"
-        dest: "{{ install_dir }}"
+        dest: "{{ install_dir.stdout }}/stable-diffusion-webui"
         version: master
         clone: yes
       become: false
